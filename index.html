@@ -1,157 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
-    <title>Image Dimension to Ratio Converter</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dimension → Ratio Converter | Design & Social Sizing Dashboard</title>
+  <meta name="description" content="Convert image dimensions to aspect ratios, batch-convert lists, and look up common social media pixel sizes. Export results to CSV or Excel.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- SheetJS for client-side XLSX export (no server required) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 </head>
 <body>
-    <div class="container">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>Dimension → Ratio Converter</h1>
+      <p>A companion tool for design and print-on-demand work: simplify aspect ratios, batch-convert lists, and check common social media sizes — all in one place.</p>
+    </header>
+
+    <!-- Tab navigation -->
+    <nav class="tab-nav" role="tablist" aria-label="Converter sections">
+      <button class="tab-btn" id="tab-converter" role="tab" aria-selected="true" aria-controls="panel-converter" data-tab="converter">Ratio Converter</button>
+      <button class="tab-btn" id="tab-batch" role="tab" aria-selected="false" aria-controls="panel-batch" data-tab="batch" tabindex="-1">Batch Converter</button>
+      <button class="tab-btn" id="tab-social" role="tab" aria-selected="false" aria-controls="panel-social" data-tab="social" tabindex="-1">Social Media Sizes</button>
+      <button class="tab-btn" id="tab-history" role="tab" aria-selected="false" aria-controls="panel-history" data-tab="history" tabindex="-1">History</button>
+    </nav>
+
+    <main id="main-content">
+
+      <!-- =========================================================
+           TAB 1: RATIO CONVERTER
+           ========================================================= -->
+      <section class="tab-panel is-active" id="panel-converter" role="tabpanel" aria-labelledby="tab-converter" tabindex="0">
         <div class="card">
-            <h1>Image Dimension to Ratio Converter</h1>
-            <p>Enter the dimensions of your image and get the simplified aspect ratio. Use the additional tools for more advanced features.</p>
+          <h2>Calculate an Aspect Ratio</h2>
+          <p class="card-intro">Enter dimensions manually, upload an image, or pick a preset to get the simplified ratio instantly.</p>
 
-            <!-- Quickly Select Common Aspect Ratios -->
-            <div class="preset-buttons">
-                <button class="preset-btn" data-width="1920" data-height="1080">HD 1080p (1920x1080)</button>
-                <button class="preset-btn" data-width="3840" data-height="2160">4K UHD (3840x2160)</button>
-                <button class="preset-btn" data-width="1280" data-height="720">HD 720p (1280x720)</button>
-                <button class="preset-btn" data-width="1440" data-height="900">WXGA+ (1440x900)</button>
-                <button class="preset-btn" data-width="800" data-height="600">SVGA (800x600)</button>
-                <button class="preset-btn" data-width="2560" data-height="1440">QHD (2560x1440)</button>
-            </div>
+          <div class="preset-buttons" role="group" aria-label="Common resolution presets">
+            <button class="preset-btn" data-width="1920" data-height="1080">HD 1080p</button>
+            <button class="preset-btn" data-width="3840" data-height="2160">4K UHD</button>
+            <button class="preset-btn" data-width="1280" data-height="720">HD 720p</button>
+            <button class="preset-btn" data-width="1440" data-height="900">WXGA+</button>
+            <button class="preset-btn" data-width="800" data-height="600">SVGA</button>
+            <button class="preset-btn" data-width="2560" data-height="1440">QHD</button>
+          </div>
 
-            <!-- Enter width, height and choose unit for either pixels or inches -->
+          <form id="converter-form" novalidate>
             <div class="input-group">
-                <div class="input-field">
-                    <label for="width">Width</label>
-                    <input type="number" id="width" placeholder="e.g., 1920" min="1">
-                    <div class="error" id="width-error">Please enter a valid width</div>
-                </div>
-                
-                <div class="input-field">
-                    <label for="height">Height</label>
-                    <input type="number" id="height" placeholder="e.g., 1080" min="1">
-                    <div class="error" id="height-error">Please enter a valid height</div>
-                </div>
-                
-                <div class="input-field">
-                    <label for="unit">Unit</label>
-                    <select id="unit">
-                        <option value="pixels">Pixels</option>
-                        <option value="inches">Inches</option>
-                    </select>
-                </div>
+              <div class="input-field">
+                <label for="width">Width</label>
+                <input type="number" id="width" name="width" placeholder="e.g., 1920" min="1" inputmode="numeric" aria-describedby="width-error">
+                <div class="error" id="width-error" role="alert">Please enter a valid width.</div>
+              </div>
+
+              <div class="input-field">
+                <label for="height">Height</label>
+                <input type="number" id="height" name="height" placeholder="e.g., 1080" min="1" inputmode="numeric" aria-describedby="height-error">
+                <div class="error" id="height-error" role="alert">Please enter a valid height.</div>
+              </div>
+
+              <div class="input-field">
+                <label for="unit">Unit</label>
+                <select id="unit" name="unit">
+                  <option value="pixels">Pixels</option>
+                  <option value="inches">Inches</option>
+                </select>
+              </div>
             </div>
 
-            <!-- Calculates the ratio and displays the result -->
             <div class="action-buttons">
-                <button class="btn" id="calculate-btn">Calculate Ratio</button>
+              <button type="submit" class="btn btn-primary" id="calculate-btn">Calculate Ratio</button>
+              <button type="button" class="btn btn-secondary" id="swap-btn">Swap Width &amp; Height</button>
+              <button type="button" class="btn btn-secondary" id="clear-btn">Clear Fields</button>
+            </div>
+          </form>
 
-            <!-- Swaps the width and height -->
-                <button class="btn btn-secondary" id="swap-btn">Swap Width & Height</button>
+          <div class="tools-section" id="additional-tools" hidden>
+            <h3>Additional Tools</h3>
 
-            <!-- Clears the input fields -->
-                <button class="btn btn-secondary" id="clear-btn">Clear Fields</button>
+            <div class="file-input-container">
+              <label class="file-input-label" for="image-upload">
+                📁 Upload Image to Extract Dimensions
+                <input type="file" id="image-upload" accept="image/*">
+              </label>
             </div>
 
-            <!-- Show additional options/tools; add as needed -->
-            <div class="tools-section" id="additional-tools" style="display: none;">
-                <h3>Additional Tools</h3>
-            
-            <!-- Option to upload an image and get its dimensions -->
-                <div class="file-input-container">
-                    <label class="file-input-label">Upload Image to Extract Dimensions
-                        <input type="file" id="image-upload" accept="image/*">
-                    </label>
+            <div class="ppi-section">
+              <h3>Unit Conversion</h3>
+              <div class="input-group">
+                <div class="input-field">
+                  <label for="ppi">Pixels Per Inch (PPI/DPI)</label>
+                  <input type="number" id="ppi" value="72" min="1" inputmode="numeric">
                 </div>
-                
-                <div class="ppi-section">
-                    <h3>Unit Conversion</h3>
-                    <div class="input-group">
-                        <div class="input-field">
-                            <label for="ppi">Pixels Per Inch (PPI/DPI)</label>
-                            <input type="number" id="ppi" value="72" min="1">
-                        </div>
-                    </div>
-                    <div class="conversion-results" id="conversion-result"></div>
-                </div>
+              </div>
+              <div class="conversion-results" id="conversion-result" aria-live="polite"></div>
+            </div>
+          </div>
+
+          <div class="toggle-section">
+            <button class="toggle-btn" id="toggle-tools" aria-expanded="false" aria-controls="additional-tools">Show Additional Tools</button>
+          </div>
+
+          <div class="result-box" id="result-box" hidden aria-live="polite">
+            <h2>Aspect Ratio</h2>
+            <div class="result-value" id="ratio-result">—</div>
+            <div id="decimal-ratio"></div>
+
+            <div class="action-buttons">
+              <button class="btn btn-small btn-success" id="copy-ratio" type="button">Copy Ratio</button>
+              <button class="btn btn-small" id="add-to-history" type="button">Save to History</button>
             </div>
 
-            <div class="toggle-section">
-                <button class="toggle-btn" id="toggle-tools">Show Additional Tools</button>
+            <div class="visual-representation">
+              <div class="ratio-box" id="ratio-visualization" role="img" aria-label="Visual box representing the calculated aspect ratio"></div>
             </div>
 
-            <div class="result-box" id="result-box" style="display: none;">
-                <h2>Aspect Ratio</h2>
-                <div class="result-value" id="ratio-result">16:9</div>
-                <div id="decimal-ratio">1.78:1</div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-small btn-success" id="copy-ratio">Copy Ratio</button>
-                    <button class="btn btn-small" id="add-to-history">Save to History</button>
-                </div>
-
-                <div class="visual-representation">
-                    <div class="ratio-box" id="ratio-visualization"></div>
-                </div>
-
-                <div class="common-ratios">
-                    <h3>Common Aspect Ratios</h3>
-                    <p id="common-ratio-match">Your ratio is equivalent to the standard 16:9 widescreen format.</p>
-                </div>
-
-                <div class="resolution-info" id="resolution-info">
-                    <h3>Resolution Information</h3>
-                    <p id="megapixels">Megapixels: 2.1 MP</p>
-                    <p id="file-size">Estimated file size (uncompressed): ~6.2 MB</p>
-                </div>
-
-                <p class="note">Note: The aspect ratio is displayed in its simplest form.</p>
+            <div class="common-ratios">
+              <h3>Common Match</h3>
+              <p id="common-ratio-match"></p>
             </div>
+
+            <div class="resolution-info" id="resolution-info">
+              <h3>Resolution Info</h3>
+              <p id="megapixels"></p>
+              <p id="file-size"></p>
+            </div>
+
+            <p class="note">The aspect ratio is displayed in its simplest whole-number form.</p>
+          </div>
         </div>
+      </section>
 
-        <div class="card" id="history-card" style="display: none;">
-            <h2>Conversion History</h2>
-            <div id="history-list">
-                <!-- History items will be added here -->
-            </div>
-            <button class="btn btn-secondary" id="clear-history" style="margin-top: 15px;">Clear History</button>
-        </div>
-        
-        <!-- Convert multiple dimensions at once. Enter one set of dimensions per line in the format "width x height" (e.g., "1920x1080"). -->
+      <!-- =========================================================
+           TAB 2: BATCH CONVERTER
+           ========================================================= -->
+      <section class="tab-panel" id="panel-batch" role="tabpanel" aria-labelledby="tab-batch" tabindex="0" hidden>
         <div class="card">
-            <h2>Batch Converter</h2>
-            <p>Convert multiple dimensions at once. Enter one set of dimensions per line in the format "width x height" (e.g., "1920x1080").</p>
-            
-            <div class="input-field">
-                <label for="batch-input">Multiple Dimensions</label>
-                <textarea id="batch-input" rows="5" placeholder="1920x1080&#10;1280x720&#10;800x600&#10;3840x2160" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: var(--border-radius);"></textarea>
-            </div>
-            
-            <button class="btn" id="batch-convert-btn" style="margin-top: 15px;">Convert All</button>
-            
-            <div id="batch-results" style="margin-top: 20px; display: none;">
-                <h3>Batch Results</h3>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                    <thead>
-                        <tr style="background-color: var(--secondary-color);">
-                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Dimensions</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Aspect Ratio</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Decimal</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Common Name</th>
-                        </tr>
-                    </thead>
-                    <tbody id="batch-results-body">
-                        <!-- Results will be added here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+          <h2>Batch Converter</h2>
+          <p class="card-intro">Convert multiple dimensions at once. Enter one set per line, formatted as "width x height" (e.g., "1920x1080").</p>
 
-    <div class="toast" id="toast-message">Copied to clipboard!</div>
-    <script src="js/script.js"></script>
+          <div class="input-field">
+            <label for="batch-input">Multiple Dimensions</label>
+            <textarea id="batch-input" rows="6" placeholder="1920x1080&#10;1280x720&#10;800x600&#10;3840x2160"></textarea>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-primary" id="batch-convert-btn" type="button">Convert All</button>
+          </div>
+
+          <div id="batch-results" hidden>
+            <h3 style="margin-top: 24px; font-size: 17px;">Batch Results</h3>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">Batch conversion results with dimensions, aspect ratio, decimal ratio, and closest common name</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Dimensions</th>
+                    <th scope="col">Aspect Ratio</th>
+                    <th scope="col">Decimal</th>
+                    <th scope="col">Common Name</th>
+                  </tr>
+                </thead>
+                <tbody id="batch-results-body"></tbody>
+              </table>
+            </div>
+
+            <div class="export-bar">
+              <button class="btn btn-secondary btn-small" id="batch-export-csv" type="button">⬇ Export CSV</button>
+              <button class="btn btn-secondary btn-small" id="batch-export-xlsx" type="button">⬇ Export XLSX</button>
+              <button class="btn btn-secondary btn-small" id="batch-copy-sheets" type="button">📋 Copy for Google Sheets</button>
+              <span class="export-status" id="batch-export-status" role="status" aria-live="polite"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 3: SOCIAL MEDIA SIZES
+           ========================================================= -->
+      <section class="tab-panel" id="panel-social" role="tabpanel" aria-labelledby="tab-social" tabindex="0" hidden>
+        <div class="card">
+          <h2>Common Social Media Pixel Sizes</h2>
+          <p class="card-intro">Reference sizes for posts, covers, and profile images. Sizes shared across platforms are combined into one row to keep this list short — check the Platform column for every place a size applies.</p>
+
+          <div class="search-field">
+            <label for="social-search">Search by platform, use case, or size</label>
+            <input type="search" id="social-search" placeholder="e.g., Instagram, cover, 1080">
+          </div>
+
+          <div class="filter-bar" role="group" aria-label="Filter by platform">
+            <button class="filter-chip" data-filter="all" aria-pressed="true" type="button">All</button>
+            <button class="filter-chip" data-filter="Instagram" aria-pressed="false" type="button">Instagram</button>
+            <button class="filter-chip" data-filter="Facebook" aria-pressed="false" type="button">Facebook</button>
+            <button class="filter-chip" data-filter="X/Twitter" aria-pressed="false" type="button">X/Twitter</button>
+            <button class="filter-chip" data-filter="LinkedIn" aria-pressed="false" type="button">LinkedIn</button>
+            <button class="filter-chip" data-filter="YouTube" aria-pressed="false" type="button">YouTube</button>
+            <button class="filter-chip" data-filter="Pinterest" aria-pressed="false" type="button">Pinterest</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <caption class="sr-only">Common social media pixel sizes by platform and use case</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Use Case</th>
+                  <th scope="col">Size (px)</th>
+                  <th scope="col">Ratio</th>
+                  <th scope="col">Platforms</th>
+                </tr>
+              </thead>
+              <tbody id="social-sizes-body"><!-- populated by script.js --></tbody>
+            </table>
+          </div>
+
+          <div class="export-bar">
+            <button class="btn btn-secondary btn-small" id="social-export-csv" type="button">⬇ Export CSV</button>
+            <button class="btn btn-secondary btn-small" id="social-export-xlsx" type="button">⬇ Export XLSX</button>
+            <button class="btn btn-secondary btn-small" id="social-copy-sheets" type="button">📋 Copy for Google Sheets</button>
+            <span class="export-status" id="social-export-status" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 4: HISTORY
+           ========================================================= -->
+      <section class="tab-panel" id="panel-history" role="tabpanel" aria-labelledby="tab-history" tabindex="0" hidden>
+        <div class="card" id="history-card">
+          <h2>Conversion History</h2>
+          <p class="card-intro">Ratios you've saved from the converter tab. Stored locally in your browser only.</p>
+          <div id="history-list"></div>
+          <p id="history-empty" class="card-intro">No saved conversions yet. Calculate a ratio and select "Save to History" to add one.</p>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" id="clear-history" type="button">Clear History</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast-message" role="status" aria-live="polite">Copied to clipboard!</div>
+  <script src="js/script.js"></script>
 </body>
 </html>
